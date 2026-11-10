@@ -36,6 +36,7 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
 .rule{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
 .rule .row{margin-top:6px}.rule .row>*{flex:1}
 .x{background:none;border:0;color:var(--bad);cursor:pointer;font-size:13px;flex:none!important}
+.edit-btn{background:none;border:0;color:var(--acc);cursor:pointer;font-size:13px;flex:none!important;margin-left:auto;margin-right:8px}
 .hint{background:var(--card2);border-radius:10px;padding:8px;font-size:12px;color:var(--mut);margin-top:8px}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;align-items:center;z-index:5}
 nav button{background:none;border:0;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:56px}
@@ -69,11 +70,11 @@ try {
   }
 } catch(e) {}
 
-var S={tab:savedTab,strats:load(),draft:fresh(),radar:{al:true,ust:false,kor:false,kg:true,ist:true},tg:false,filter:"Tümü"};
+var S={tab:savedTab,strats:load(),draft:fresh(),editIdx:null,radar:{al:true,ust:false,kor:false,kg:true,ist:true},tg:false,filter:"Tümü"};
 
 function fresh(){return{name:"",mode:"Canlı (In-Play)",rules:[]}}
 function load(){try{var v=localStorage.getItem("strats");if(v)return JSON.parse(v)}catch(e){}
-return[{n:"Favori korner al",on:true,w:36,l:4,roi:12.4,sig:41},{n:"Deneme (kopya)",on:true,w:4,l:0,roi:100,sig:4},{n:"Test 1",on:false,w:6,l:1,roi:5.1,sig:7}]}
+return[{n:"Favori korner al",on:true,w:36,l:4,roi:12.4,sig:41,rules:[{t:"Korner",op:"büyük eşit",v:5}]},{n:"Deneme (kopya)",on:true,w:4,l:0,roi:100,sig:4,rules:[{t:"Dakika",op:"büyük eşit",v:70}]},{n:"Test 1",on:false,w:6,l:1,roi:5.1,sig:7,rules:[]}]}
 function save(){try{localStorage.setItem("strats",JSON.stringify(S.strats))}catch(e){}}
 function $(s){return document.querySelector(s)}
 function esc(t){return String(t||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -84,7 +85,7 @@ function panel(){var a=S.strats||[],w=0,l=0,sg=0;a.forEach(function(x){w+=x.w;l+
 return head("Stratejiler","Canlı kurallarını kaydet, sinyalleri Telegram’dan al")+
 '<div class="grid4"><div class="stat"><b>'+a.filter(function(x){return x.on}).length+'</b><span>Açık</span></div><div class="stat"><b>'+sg+'</b><span>Sinyal</span></div><div class="stat"><b class="ok">'+w+'</b><span>Kazandı</span></div><div class="stat"><b class="bad">'+l+'</b><span>Kaybetti</span></div></div>'+
 '<h2>Stratejilerim <span class="sub">'+a.length+'</span></h2>'+
-a.map(function(x,i){var pc=x.w+x.l?Math.round(100*x.w/(x.w+x.l)):0;return'<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b>'+tog("s"+i,x.on)+'</div><div class="row sub" style="margin-top:6px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="x" data-d="'+i+'" style="margin-left:auto">Sil</button></div></div>'}).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>'}
+a.map(function(x,i){var pc=x.w+x.l?Math.round(100*x.w/(x.w+x.l)):0;return'<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b>'+tog("s"+i,x.on)+'</div><div class="row sub" style="margin-top:6px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="edit-btn" data-ed="'+i+'">Düzenle</button><button class="x" data-d="'+i+'">Sil</button></div></div>'}).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>'}
 
 function ongoru(){var f=S.filter,rows=PRED.filter(function(p){return f=="Tümü"||(f=="Kazandı"&&p[7]=="w")||(f=="Kaybetti"&&p[7]=="l")});
 var w=PRED.filter(function(p){return p[7]=="w"}).length,l=PRED.length-w;
@@ -118,15 +119,17 @@ return head("Menü","Telegram ve radar ayarları")+
 '<div class="card">'+L.map(function(x){return'<div class="row sp" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>'+x[1]+'</b><div class="sub">'+x[2]+'</div></div>'+tog("r"+x[0],R[x[0]])+'</div>'}).join("")+'</div>'+
 '<button class="btn" data-go="ongoru">Öngörü ekranına git</button><button class="btn ghost" data-go="mac">Maç öncesi tahminler</button>'}
 
-function yeni(){var d=S.draft;
-return head("Yeni strateji","Kuralları seç, sınırları belirle")+
-'<div class="card"><label>Ad</label><input id="nm" value="'+esc(d.name)+'" placeholder="Örn: İY 1.5 Üst oranı &gt; 1.90"><label>Mod</label><select id="md"><option>Canlı (In-Play)</option><option>Maç öncesi</option></select></div>'+
+function yeni(){var d=S.draft, isEdit = S.editIdx !== null;
+return head(isEdit ? "Stratejiyi Düzenle" : "Yeni strateji","Kuralları seç, sınırları belirle")+
+'<div class="card"><label>Ad</label><input id="nm" value="'+esc(d.name)+'" placeholder="Örn: İY 1.5 Üst oranı &gt; 1.90"><label>Mod</label><select id="md"><option'+(d.mode=="Canlı (In-Play)"?" selected":"")+'>Canlı (In-Play)</option><option'+(d.mode=="Maç öncesi"?" selected":"")+'>Maç öncesi</option></select></div>'+
 '<div class="card"><h2>Canlı kural sihirbazı</h2><div class="sub">Kuralların hepsi bağımsız. Birden fazla seçersen hepsi (VE) aranır.</div>'+
 '<div class="hint"><b class="acc">★ Sık kullandıkların</b><div class="chips" style="margin-top:8px">'+FREQ.map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div></div>'+
 CATS.map(function(c){return'<div class="card"><h2>'+c[0]+'</h2><div class="chips">'+c[1].map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div>'}).join("")+
-'## Kurallar <span class="sub">'+d.rules.length+'</span></h2>'+
-(d.rules.map(function(r,i){return'<div class="rule"><div class="row sp"><b>'+esc(r.t)+'</b><button class="x" data-rm="'+i+'">Sil</button></div><div class="row"><select data-op="'+i+'">'+OPS.map(function(o){return'<option'+(o==r.op?" selected":"")+'>'+o+'</option>'}).join("")+'</select><input type="number" data-v="'+i+'" value="'+r.v+'"></div><div class="hint">'+esc(r.t)+' '+r.op+' '+r.v+' olduğunda sinyal gelir.</div></div>'}).join("")||'<div class="card sub">Yukarıdan en az bir kural ekle.</div>')+
-'<button class="btn" id="sv">Kaydet ve aç</button>'}
+'<h2>Kurallar <span class="sub">'+(d.rules||[]).length+'</span></h2>'+
+((d.rules||[]).map(function(r,i){return'<div class="rule"><div class="row sp"><b>'+esc(r.t)+'</b><button class="x" data-rm="'+i+'">Sil</button></div><div class="row"><select data-op="'+i+'">'+OPS.map(function(o){return'<option'+(o==r.op?" selected":"")+'>'+o+'</option>'}).join("")+'</select><input type="number" data-v="'+i+'" value="'+r.v+'"></div><div class="hint">'+esc(r.t)+' '+r.op+' '+r.v+' olduğunda sinyal gelir.</div></div>'}).join("")||'<div class="card sub">Yukarıdan en az bir kural ekle.</div>')+
+'<button class="btn" id="sv">'+(isEdit?"Değişiklikleri Kaydet":"Kaydet ve aç")+'</button>'+
+(isEdit?'<button class="btn ghost" id="cn">İptal Et</button>':'');
+}
 
 function render(){
   try {
@@ -146,12 +149,25 @@ function render(){
 }
 
 document.addEventListener("click",function(e){
-  var el=e.target.closest("[data-n],[data-go],[data-t],[data-a],[data-rm],[data-d],[data-f],#sv");
+  var el=e.target.closest("[data-n],[data-go],[data-t],[data-a],[data-rm],[data-d],[data-ed],[data-f],#sv,#cn");
   if(!el)return;
   var D=el.dataset;
   if(D.n||D.go){
+    if((D.n=="yeni"||D.go=="yeni") && S.editIdx===null){ S.draft=fresh(); }
     S.tab=D.n||D.go;
     try{ localStorage.setItem("aktifSekme", S.tab); }catch(e){}
+  }
+  else if(D.ed!==undefined){
+    var idx = +D.ed;
+    S.editIdx = idx;
+    var st = S.strats[idx];
+    S.draft = JSON.parse(JSON.stringify({name:st.n, mode:"Canlı (In-Play)", rules:st.rules||[]}));
+    S.tab = "yeni";
+  }
+  else if(el.id=="cn"){
+    S.editIdx = null;
+    S.draft = fresh();
+    S.tab = "panel";
   }
   else if(D.f){S.filter=D.f}
   else if(D.a){syncDraft();S.draft.rules.push({t:D.a,op:OPS[0],v:3})}
@@ -160,7 +176,15 @@ document.addEventListener("click",function(e){
   else if(D.t){var k=D.t;if(k=="tg")S.tg=!S.tg;else if(k[0]=="s"){var s=S.strats[+k.slice(1)];s.on=!s.on;save()}else S.radar[k.slice(1)]=!S.radar[k.slice(1)]}
   else if(el.id=="sv"){
     syncDraft();var d=S.draft;if(!d.rules.length){alert("En az bir kural ekle.");return}
-    S.strats.unshift({n:d.name||"Yeni strateji",on:true,w:0,l:0,roi:0,sig:0});save();S.draft=fresh();
+    if(S.editIdx !== null){
+      var cur = S.strats[S.editIdx];
+      cur.n = d.name || "Strateji";
+      cur.rules = d.rules;
+      S.editIdx = null;
+    } else {
+      S.strats.unshift({n:d.name||"Yeni strateji",on:true,w:0,l:0,roi:0,sig:0,rules:d.rules});
+    }
+    save();S.draft=fresh();
     S.tab="panel";
     try{ localStorage.setItem("aktifSekme", S.tab); }catch(e){}
   }
