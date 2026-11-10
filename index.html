@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Strateji Sistemi</title>
+<style>
+:root{--bg:#0a1220;--card:#111c30;--card2:#182a47;--line:#233a5e;--tx:#e6eefb;--mut:#8da2c0;--acc:#3b82f6;--accfg:#ffffff;--ok:#22c55e;--bad:#ef4444;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#eef3fb;--card:#fff;--card2:#e3ecf9;--line:#cfdcf0;--tx:#0e1a2e;--mut:#55698a;--accfg:#fff}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#eef3fb;--card:#fff;--card2:#e3ecf9;--line:#cfdcf0;--tx:#0e1a2e;--mut:#55698a}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:520px;margin:0 auto;padding:14px 14px 110px}
+h1{font-size:20px;margin:0}h2{font-size:15px;margin:0 0 8px}
+.sub{color:var(--mut);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.row{display:flex;align-items:center;gap:8px}.sp{justify-content:space-between}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:20px}.stat span{font-size:11px;color:var(--mut)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.acc{color:var(--acc)}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--tx);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--acc);color:var(--accfg);border-color:var(--acc);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.btn{width:100%;background:var(--acc);color:var(--accfg);border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+.btn.ghost{background:var(--card2);color:var(--tx);border:1px solid var(--line);margin-top:8px}
+input,select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
+.tog{width:44px;height:26px;border-radius:99px;background:var(--line);position:relative;border:0;flex:none;cursor:pointer}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s}
+.tog.on{background:var(--ok)}.tog.on::after{left:21px}
+.match{border-left:3px solid var(--mut)}.match.w{border-left-color:var(--ok)}.match.l{border-left-color:var(--bad)}
+.odd{background:var(--card2);border-radius:8px;padding:4px 9px;font-weight:700}
+.tag{font-size:11px;border-radius:6px;padding:2px 7px;background:var(--card2)}
+.tag.w{color:var(--ok)}.tag.l{color:var(--bad)}
+.rule{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
+.rule .row{margin-top:6px}.rule .row>*{flex:1}
+.x{background:none;border:0;color:var(--bad);cursor:pointer;font-size:13px;flex:none!important}
+.hint{background:var(--card2);border-radius:10px;padding:8px;font-size:12px;color:var(--mut);margin-top:8px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;align-items:center;z-index:5}
+nav button{background:none;border:0;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:56px}
+nav button.on{color:var(--acc)}nav button i{font-style:normal;font-size:18px}
+nav .plus{width:52px;height:52px;border-radius:16px;background:var(--acc);color:var(--accfg);font-size:28px;font-weight:700;margin-top:-18px;min-width:0;justify-content:center}
+.bar{height:6px;border-radius:9px;background:var(--bad);overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--ok)}
+.live{color:var(--ok);font-weight:700;font-size:12px}
+.sc{font-size:22px;font-weight:800;min-width:56px;text-align:center}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav id="nav"></nav>
+<script>
+var CATS=[
+["Dakika / Periyot",["Dakika","Periyot","Yarı ilk X dakika"]],
+["Skor / Gol",["Skor","Kim önde","Toplam gol","Yarı gol sayısı","KG Var / Yok","Sıradaki gol","Sıradaki gol çifte şans"]],
+["Korner / Alt-Üst oranı",["Alt / Üst oranı","Maç öncesi Alt / Üst","Favori oranı","Maç öncesi 1X2","Maç öncesi KG","Korner Alt / Üst"]],
+["İstatistik",["İstatistik","Sarı kart","Şut","İsabetli şut","Korner"]]];
+var FREQ=["İstatistik","Dakika","Maç öncesi 1X2","Kim önde","Yarı ilk X dakika","Skor"];
+var OPS=["büyük eşit","küçük eşit","eşit"];
+var PRED=[["GOG FCC","Clube de Salgaocar","Hindistan Şampiyonası","71’","1-1","MS 3.5 Alt",1.50,"w","2-1"],["Tivana","Anstrengung United","Hindistan Şampiyonası","72’","2-2","MS 5.5 Alt",1.48,"w","2-2"],["Goiás","Atlético","Brezilya Serie B","70’","0-0","MS 1.5 Alt",1.41,"w","1-0"],["Inter Wanica","Leo Victor","Surinam Şampiyonası","70’","1-2","MS 3.5 Alt",1.48,"l","1-3"],["Montego Bay","Molynes Utd","Jamaika Premier","68’","0-0","İY 1.5 Alt",1.42,"w","0-1"]];
+var PRE=[["Club León","Guadalajara","Meksika Liga MX","05:00","MS 3.5 Alt",1.40,"w","1-1"],["C.D. Marathón","Deportivo Choloma","Honduras Ulusal Lig","04:30","C.D. Marathón 1.5 Alt",1.43,"l","2-0"],["C.S. Herediano","Saprissa","Kosta Rika Primera","03:00","MS 2.5 Alt",1.38,"w","1-0"]];
+var RADAR=[["Fratria","FC Sportist Svoge","79’","3-1",6,4,5,38],["Tatran Liptovsky","Bytca","47’","1-1",3,3,3,22],["Deportivo Maldonado II","Nacional M.","67’","1-0",2,5,2,19],["Lokomotiv","Dinamo","55’","0-0",1,2,1,9]];
+var S={tab:"panel",strats:load(),draft:fresh(),radar:{al:true,ust:false,kor:false,kg:true,ist:true},tg:false,filter:"Tümü"};
+function fresh(){return{name:"",mode:"Canlı (In-Play)",rules:[]}}
+function load(){try{var v=localStorage.getItem("strats");if(v)return JSON.parse(v)}catch(e){}
+return[{n:"Favori korner al",on:true,w:36,l:4,roi:12.4,sig:41},{n:"Deneme (kopya)",on:true,w:4,l:0,roi:100,sig:4},{n:"Test 1",on:false,w:6,l:1,roi:5.1,sig:7}]}
+function save(){try{localStorage.setItem("strats",JSON.stringify(S.strats))}catch(e){}}
+function $(s){return document.querySelector(s)}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function head(t,s){return'<div class="row sp"><div><h1>'+t+'</h1><div class="sub">'+s+'</div></div><span class="live">● 1 çevrimiçi</span></div><div style="height:12px"></div>'}
+function tog(k,on){return'<button class="tog'+(on?" on":"")+'" data-t="'+k+'" aria-label="'+k+'"></button>'}
+function panel(){var a=S.strats,w=0,l=0,sg=0;a.forEach(function(x){w+=x.w;l+=x.l;sg+=x.sig});
+return head("Stratejiler","Canlı kurallarını kaydet, sinyalleri Telegram’dan al")+
+'<div class="grid4"><div class="stat"><b>'+a.filter(function(x){return x.on}).length+'</b><span>Açık</span></div><div class="stat"><b>'+sg+'</b><span>Sinyal</span></div><div class="stat"><b class="ok">'+w+'</b><span>Kazandı</span></div><div class="stat"><b class="bad">'+l+'</b><span>Kaybetti</span></div></div>'+
+'<h2>Stratejilerim <span class="sub">'+a.length+'</span></h2>'+
+a.map(function(x,i){var pc=x.w+x.l?Math.round(100*x.w/(x.w+x.l)):0;return'<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b>'+tog("s"+i,x.on)+'</div><div class="row sub" style="margin-top:6px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="x" data-d="'+i+'" style="margin-left:auto">Sil</button></div></div>'}).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>'}
+function ongoru(){var f=S.filter,rows=PRED.filter(function(p){return f=="Tümü"||(f=="Kazandı"&&p[7]=="w")||(f=="Kaybetti"&&p[7]=="l")});
+var w=PRED.filter(function(p){return p[7]=="w"}).length,l=PRED.length-w;
+return head("Öngörü","Radar + Piyasa ortak kararı")+
+'<div class="grid4"><div class="stat"><b>'+PRED.length+'</b><span>Toplam</span></div><div class="stat"><b class="ok">'+w+'</b><span>Kazandı</span></div><div class="stat"><b class="bad">'+l+'</b><span>Kaybetti</span></div><div class="stat"><b>%'+Math.round(100*w/PRED.length)+'</b><span>Başarı</span></div></div>'+
+'<div class="card row sp"><div><b>Telegram sinyali</b><div class="sub">'+(S.tg?"Açık":"Kapalı · önce tür seç, sonra aç")+'</div></div>'+tog("tg",S.tg)+'</div>'+
+'<div class="chips" style="margin-bottom:10px">'+["Tümü","Kazandı","Kaybetti"].map(function(x){return'<button class="chip'+(x==f?" on":"")+'" data-f="'+x+'">'+x+'</button>'}).join("")+'</div>'+
+rows.map(function(p){return'<div class="card match '+p[7]+'"><div class="row sp"><b>'+p[0]+' – '+p[1]+'</b><span class="odd">'+p[6].toFixed(2)+'</span></div><div class="sub">'+p[3]+' · '+p[4]+' · '+p[2]+'</div><div class="row sp" style="margin-top:6px"><b>'+p[5]+'</b><span class="tag '+p[7]+'">'+(p[7]=="w"?"Kazandı":"Kaybetti")+' · '+p[8]+'</span></div></div>'}).join("")}
+function mac(){return head("Maç öncesi","İstatistik + oran analiziyle tahminler")+
+'<div class="card"><div class="sub">Sonuçlanan tahminler</div><div class="row sp"><b style="font-size:28px">%71</b><span class="tag w">+1.97 birim</span></div><div class="bar"><i style="width:71%"></i></div><div class="row sp sub"><span class="ok">257 kazandı</span><span class="bad">105 kaybetti</span></div></div>'+
+PRE.map(function(p){return'<div class="card match '+p[6]+'"><div class="sub">'+p[2]+' · '+p[3]+'</div><div class="row sp" style="margin:4px 0"><b>'+p[0]+'</b><b>'+p[7].split("-")[0]+'</b></div><div class="row sp" style="margin-bottom:6px"><b>'+p[1]+'</b><b>'+p[7].split("-")[1]+'</b></div><div class="row sp"><span class="tag">Tahmin: '+p[4]+'</span><span class="odd">'+p[5].toFixed(2)+'</span></div></div>'}).join("")}
+function ai(r){var raw=6*r[4]+2*r[5]+2.5*r[6]+0.35*r[7];return Math.min(95,Math.round(100*(1-Math.exp(-raw/60))))}
+function radar(){var L=RADAR.map(function(r){return{r:r,p:ai(r)}}).sort(function(a,b){return b.p-a.p});
+return head("Radar","Yapay zeka gol ihtimali · canlı baskı")+'<div class="grid4" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>'+L.length+'</b><span>Canlı</span></div><div class="stat"><b class="acc">'+L.filter(function(x){return x.p>=50}).length+'</b><span>Radar</span></div><div class="stat"><b class="ok">'+L.filter(function(x){return x.p>=70}).length+'</b><span>Yüksek</span></div></div>'+
+L.map(function(x){var r=x.r,p=x.p,c=p>=70?"ok":p>=50?"acc":"sub";return'<div class="card"><div class="row sp sub"><span>'+r[2]+' · '+(p>=70?"Yüksek":p>=50?"Orta":"Düşük")+' ihtimal</span><b class="'+c+'">%'+p+'</b></div><div class="row sp" style="margin-top:6px"><b>'+r[0]+'<br>'+r[1]+'</b><span class="sc">'+r[3]+'</span></div><div class="bar" style="background:var(--line)"><i style="width:'+p+'%;background:var(--acc)"></i></div><div class="sub">İsabetli şut '+r[4]+' · Şut '+r[5]+' · Korner '+r[6]+' · Ceza sahası şutu '+r[7]+'</div></div>'}).join("")+'<div class="hint">Skor örnek verilerle hesaplanır ve kazanç garantisi vermez. Gerçek veri için sunucu bağlantısı gerekir.</div>'}
+function radarOld(){return head("Radar","Canlı basılı ve gol radarı")+
+'<div class="grid4" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>11</b><span>Canlı</span></div><div class="stat"><b class="acc">3</b><span>Radar</span></div><div class="stat"><b>1</b><span>Yüksek</span></div></div>'+
+RADAR.map(function(r){return'<div class="card"><div class="row sp sub"><span>'+r[2]+' · Baskı yüksek</span><b class="'+(r[4]>=48?"ok":"acc")+'">%'+r[4]+'</b></div><div class="row sp" style="margin-top:6px"><b>'+r[0]+'<br>'+r[1]+'</b><span class="sc">'+r[3]+'</span></div></div>'}).join("")}
+function menu(){var R=S.radar,L=[["al","Sağlanan oranlar","Stratejim sonuç Alt ve Üst oranı"],["ust","Alt / Üst oranları","Gol alt/üst piyasası"],["kor","Korner oranları","Korner alt/üst takibi"],["kg","KG oranları","Karşılıklı gol var/yok"],["ist","İstatistik","Atak, şut, korner, topa sahip olma"]];
+return head("Menü","Telegram ve radar ayarları")+
+'<div class="card">'+L.map(function(x){return'<div class="row sp" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>'+x[1]+'</b><div class="sub">'+x[2]+'</div></div>'+tog("r"+x[0],R[x[0]])+'</div>'}).join("")+'</div>'+
+'<button class="btn" data-go="ongoru">Öngörü ekranına git</button><button class="btn ghost" data-go="mac">Maç öncesi tahminler</button>'}
+function yeni(){var d=S.draft;
+return head("Yeni strateji","Kuralları seç, sınırları belirle")+
+'<div class="card"><label>Ad</label><input id="nm" value="'+esc(d.name)+'" placeholder="Örn: İY 1.5 Üst oranı &gt; 1.90"><label>Mod</label><select id="md"><option>Canlı (In-Play)</option><option>Maç öncesi</option></select></div>'+
+'<div class="card"><h2>Canlı kural sihirbazı</h2><div class="sub">Kuralların hepsi bağımsız. Birden fazla seçersen hepsi (VE) aranır.</div>'+
+'<div class="hint"><b class="acc">★ Sık kullandıkların</b><div class="chips" style="margin-top:8px">'+FREQ.map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div></div>'+
+CATS.map(function(c){return'<div class="card"><h2>'+c[0]+'</h2><div class="chips">'+c[1].map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div>'}).join("")+
+'<h2>Kurallar <span class="sub">'+d.rules.length+'</span></h2>'+
+(d.rules.map(function(r,i){return'<div class="rule"><div class="row sp"><b>'+esc(r.t)+'</b><button class="x" data-rm="'+i+'">Sil</button></div><div class="row"><select data-op="'+i+'">'+OPS.map(function(o){return'<option'+(o==r.op?" selected":"")+'>'+o+'</option>'}).join("")+'</select><input type="number" data-v="'+i+'" value="'+r.v+'"></div><div class="hint">'+esc(r.t)+' '+r.op+' '+r.v+' olduğunda sinyal gelir.</div></div>'}).join("")||'<div class="card sub">Yukarıdan en az bir kural ekle.</div>')+
+'<button class="btn" id="sv">Kaydet ve aç</button>'}
+function render(){var t=S.tab,h={panel:panel,ongoru:ongoru,mac:mac,radar:radar,menu:menu,yeni:yeni}[t]();
+var y=window.scrollY;$("#app").innerHTML=h;window.scrollTo(0,t=="yeni"?y:0);
+var M=[["panel","▦","Panel"],["ongoru","↗","Öngörü"],["yeni","+",""],["radar","◎","Radar"],["menu","≡","Menü"]];
+$("#nav").innerHTML=M.map(function(m){return m[0]=="yeni"?'<button class="plus" data-n="yeni" aria-label="Yeni strateji">+</button>':'<button data-n="'+m[0]+'" class="'+((t==m[0]||(t=="mac"&&m[0]=="menu"))?"on":"")+'"><i>'+m[1]+'</i>'+m[2]+'</button>'}).join("")}
+document.addEventListener("click",function(e){var el=e.target.closest("[data-n],[data-go],[data-t],[data-a],[data-rm],[data-d],[data-f],#sv");if(!el)return;var D=el.dataset;
+if(D.n||D.go){S.tab=D.n||D.go}
+else if(D.f){S.filter=D.f}
+else if(D.a){syncDraft();S.draft.rules.push({t:D.a,op:OPS[0],v:3})}
+else if(D.rm!==undefined){syncDraft();S.draft.rules.splice(+D.rm,1)}
+else if(D.d!==undefined){S.strats.splice(+D.d,1);save()}
+else if(D.t){var k=D.t;if(k=="tg")S.tg=!S.tg;else if(k[0]=="s"){var s=S.strats[+k.slice(1)];s.on=!s.on;save()}else S.radar[k.slice(1)]=!S.radar[k.slice(1)]}
+else if(el.id=="sv"){syncDraft();var d=S.draft;if(!d.rules.length){alert("En az bir kural ekle.");return}
+S.strats.unshift({n:d.name||"Yeni strateji",on:true,w:0,l:0,roi:0,sig:0});save();S.draft=fresh();S.tab="panel"}
+render()});
+function syncDraft(){var n=$("#nm");if(!n)return;S.draft.name=n.value;S.draft.mode=$("#md").value;
+document.querySelectorAll("[data-op]").forEach(function(s){S.draft.rules[+s.dataset.op].op=s.value});
+document.querySelectorAll("[data-v]").forEach(function(s){S.draft.rules[+s.dataset.v].v=s.value})}
+function loadLive(){fetch("/api/live").then(function(r){return r.json()}).then(function(d){if(d&&d.length){RADAR=d;if(S.tab=="radar")render()}}).catch(function(){})}
+loadLive();setInterval(loadLive,60000);
+render();
+</script>
+</body>
+</html>
