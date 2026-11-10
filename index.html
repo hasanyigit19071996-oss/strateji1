@@ -37,6 +37,7 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
 .rule .row{margin-top:6px}.rule .row>*{flex:1}
 .x{background:none;border:0;color:var(--bad);cursor:pointer;font-size:13px;flex:none!important}
 .edit-btn{background:none;border:0;color:var(--acc);cursor:pointer;font-size:13px;flex:none!important;margin-left:auto;margin-right:8px}
+.rule-tag{font-size:11px;background:var(--card2);border:1px solid var(--line);padding:3px 8px;border-radius:6px;color:var(--mut);margin-top:6px;display:inline-block}
 .hint{background:var(--card2);border-radius:10px;padding:8px;font-size:12px;color:var(--mut);margin-top:8px}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;align-items:center;z-index:5}
 nav button{background:none;border:0;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:56px}
@@ -85,7 +86,11 @@ function panel(){var a=S.strats||[],w=0,l=0,sg=0;a.forEach(function(x){w+=x.w;l+
 return head("Stratejiler","Canlı kurallarını kaydet, sinyalleri Telegram’dan al")+
 '<div class="grid4"><div class="stat"><b>'+a.filter(function(x){return x.on}).length+'</b><span>Açık</span></div><div class="stat"><b>'+sg+'</b><span>Sinyal</span></div><div class="stat"><b class="ok">'+w+'</b><span>Kazandı</span></div><div class="stat"><b class="bad">'+l+'</b><span>Kaybetti</span></div></div>'+
 '<h2>Stratejilerim <span class="sub">'+a.length+'</span></h2>'+
-a.map(function(x,i){var pc=x.w+x.l?Math.round(100*x.w/(x.w+x.l)):0;return'<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b>'+tog("s"+i,x.on)+'</div><div class="row sub" style="margin-top:6px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="edit-btn" data-ed="'+i+'">Düzenle</button><button class="x" data-d="'+i+'">Sil</button></div></div>'}).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>'}
+a.map(function(x,i){
+  var pc=x.w+x.l?Math.round(100*x.w/(x.w+x.l)):0;
+  var rulesHtml = (x.rules && x.rules.length) ? '<div style="margin-top:6px">'+x.rules.map(function(r){return '<span class="rule-tag">'+esc(r.t)+' '+esc(r.op)+' '+esc(r.v)+'</span>'}).join(" ")+'</div>' : '<div class="sub" style="margin-top:4px">Kural yok</div>';
+  return '<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b>'+tog("s"+i,x.on)+'</div>'+rulesHtml+'<div class="row sub" style="margin-top:8px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="edit-btn" data-ed="'+i+'">Düzenle</button><button class="x" data-d="'+i+'">Sil</button></div></div>';
+}).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>'}
 
 function ongoru(){var f=S.filter,rows=PRED.filter(function(p){return f=="Tümü"||(f=="Kazandı"&&p[7]=="w")||(f=="Kaybetti"&&p[7]=="l")});
 var w=PRED.filter(function(p){return p[7]=="w"}).length,l=PRED.length-w;
@@ -114,7 +119,7 @@ function radar(){
   '<div class="hint">Yapay zeka tahmini canlı istatistiklere göre anlık hesaplanır.</div>';
 }
 
-function menu(){var R=S.radar,L=[["al","Sağlanan oranlar","Stratejim sonuç Alt ve Üst oranı"],["ust","Alt / Üst oranları","Gol alt/üst piyasası"],["kor","Korner oranları","Korner alt/üst takibi"],["kg","KG oranları","Karşılıklı gol var/yok"],["ist","İstatistik","Atak, şut, korner, topa sahip olma"]];
+function menu(){var R=S.radar,L=[["al","Sağlanan oranlar","Stratejim sonuç Alt و Üst oranı"],["ust","Alt / Üst oranları","Gol alt/üst piyasası"],["kor","Korner oranları","Korner alt/üst takibi"],["kg","KG oranları","Karşılıklı gol var/yok"],["ist","İstatistik","Atak, şut, korner, topa sahip olma"]];
 return head("Menü","Telegram ve radar ayarları")+
 '<div class="card">'+L.map(function(x){return'<div class="row sp" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>'+x[1]+'</b><div class="sub">'+x[2]+'</div></div>'+tog("r"+x[0],R[x[0]])+'</div>'}).join("")+'</div>'+
 '<button class="btn" data-go="ongoru">Öngörü ekranına git</button><button class="btn ghost" data-go="mac">Maç öncesi tahminler</button>'}
@@ -127,7 +132,7 @@ return head(isEdit ? "Stratejiyi Düzenle" : "Yeni strateji","Kuralları seç, s
 CATS.map(function(c){return'<div class="card"><h2>'+c[0]+'</h2><div class="chips">'+c[1].map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div>'}).join("")+
 '<h2>Kurallar <span class="sub">'+(d.rules||[]).length+'</span></h2>'+
 ((d.rules||[]).map(function(r,i){return'<div class="rule"><div class="row sp"><b>'+esc(r.t)+'</b><button class="x" data-rm="'+i+'">Sil</button></div><div class="row"><select data-op="'+i+'">'+OPS.map(function(o){return'<option'+(o==r.op?" selected":"")+'>'+o+'</option>'}).join("")+'</select><input type="number" data-v="'+i+'" value="'+r.v+'"></div><div class="hint">'+esc(r.t)+' '+r.op+' '+r.v+' olduğunda sinyal gelir.</div></div>'}).join("")||'<div class="card sub">Yukarıdan en az bir kural ekle.</div>')+
-'<button class="btn" id="sv">'+(isEdit?"Değişiklikleri Kaydet":"Kaydet ve aç")+'</button>'+
+'<button class="btn" id="sv">'+(isEdit?"Değişiklikleri Kaydet":"Kaydet و aç")+'</button>'+
 (isEdit?'<button class="btn ghost" id="cn">İptal Et</button>':'');
 }
 
