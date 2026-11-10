@@ -64,12 +64,19 @@ var PRED=[["GOG FCC","Clube de Salgaocar","Hindistan Şampiyonası","71’","1-1
 var PRE=[["Club León","Guadalajara","Meksika Liga MX","05:00","MS 3.5 Alt",1.40,"w","1-1"],["C.D. Marathón","Deportivo Choloma","Honduras Ulusal Lig","04:30","C.D. Marathón 1.5 Alt",1.43,"l","2-0"],["C.S. Herediano","Saprissa","Kosta Rika Primera","03:00","MS 2.5 Alt",1.38,"w","1-0"]];
 var RADAR=[["Fratria","FC Sportist Svoge","79’","3-1",6,4,5,38],["Tatran Liptovsky","Bytca","47’","1-1",3,3,3,22],["Deportivo Maldonado II","Nacional M.","67’","1-0",2,5,2,19],["Lokomotiv","Dinamo","55’","0-0",1,2,1,9]];
 
-// Oran Düşüş Takip Verisi (A Takımı vs B Takımı Örneği Dahil)
-var ODDS_DROPS=[
-  {home:"A Takımı", away:"B Takımı", matchTime:"23:00", pick:"MS 1", initialTime:"18:00", initialOdd:1.92, currentTime:"21:00", currentOdd:1.70},
-  {home:"Real Madrid", away:"Barcelona", matchTime:"22:00", pick:"MS 1", initialTime:"14:00", initialOdd:2.10, currentTime:"19:30", currentOdd:1.85},
-  {home:"Arsenal", away:"Chelsea", matchTime:"20:30", pick:"2.5 Üst", initialTime:"15:00", initialOdd:1.80, currentTime:"18:15", currentOdd:1.55}
-];
+var ODDS_DROPS=loadOdds();
+
+function loadOdds(){
+  try{
+    var v=localStorage.getItem("odds_drops");
+    if(v) return JSON.parse(v);
+  }catch(e){}
+  return [
+    {home:"Galatasaray", away:"Fenerbahçe", matchTime:"20:00", pick:"MS 1", initialTime:"15:00", initialOdd:2.10, currentTime:"18:30", currentOdd:1.80},
+    {home:"Real Madrid", away:"Barcelona", matchTime:"22:00", pick:"MS 1", initialTime:"14:00", initialOdd:2.20, currentTime:"19:30", currentOdd:1.85},
+    {home:"Arsenal", away:"Chelsea", matchTime:"20:30", pick:"2.5 Üst", initialTime:"15:00", initialOdd:1.85, currentTime:"18:15", currentOdd:1.55}
+  ];
+}
 
 var savedTab = "panel";
 try {
@@ -85,6 +92,7 @@ function fresh(){return{name:"",mode:"Canlı (In-Play)",rules:[]}}
 function load(){try{var v=localStorage.getItem("strats");if(v)return JSON.parse(v)}catch(e){}
 return[{n:"Favori korner al",on:true,w:36,l:4,roi:12.4,sig:41,rules:[{t:"Korner",op:"büyük eşit",v:5}]},{n:"Deneme (kopya)",on:true,w:4,l:0,roi:100,sig:4,rules:[{t:"Dakika",op:"büyük eşit",v:70}]},{n:"Test 1",on:false,w:6,l:1,roi:5.1,sig:7,rules:[]}]}
 function save(){try{localStorage.setItem("strats",JSON.stringify(S.strats))}catch(e){}}
+function saveOdds(){try{localStorage.setItem("odds_drops",JSON.stringify(ODDS_DROPS))}catch(e){}}
 function $(s){return document.querySelector(s)}
 function esc(t){return String(t||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function head(t,s){return'<div class="row sp"><div><h1>'+t+'</h1><div class="sub">'+s+'</div></div><span class="live">● 1 çevrimiçi</span></div><div style="height:12px"></div>'}
@@ -101,15 +109,15 @@ a.map(function(x,i){
 }).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>'}
 
 function oranlar(){
-  return head("Oran Düşüş Takibi","Belirgin oran düşüşü yaşanan maçlar")+
-  '<div class="grid4" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px"><div class="stat"><b>'+ODDS_DROPS.length+'</b><span>Sinyal Yapılan</span></div><div class="stat"><b class="bad">▼ Düşen</b><span>Oran Hareketleri</span></div></div>'+
+  return head("Oran Düşüş Takibi","Canlı ve bülten hareketleri takibi")+
+  '<div class="grid4" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px"><div class="stat"><b>'+ODDS_DROPS.length+'</b><span>Taranan Maç</span></div><div class="stat"><b class="bad">▼ Otomatik</b><span>Düşüş Sinyali</span></div></div>'+
   ODDS_DROPS.map(function(o){
     var dropPercent = (((o.initialOdd - o.currentOdd) / o.initialOdd) * 100).toFixed(1);
     return '<div class="card"><div class="row sp"><b style="font-size:15px">'+esc(o.home)+' – '+esc(o.away)+'</b><span class="sub">Saat: '+esc(o.matchTime)+'</span></div>'+
     '<div class="row sp" style="margin-top:8px"><div><span class="tag" style="font-size:12px">'+esc(o.pick)+'</span></div><div class="drop-badge">▼ %'+dropPercent+' Düşüş</div></div>'+
-    '<div class="row sp sub" style="margin-top:10px;background:var(--card2);padding:8px;border-radius:8px"><span>'+esc(o.initialTime)+' Oranı: <b>'+o.initialOdd.toFixed(2)+'</b></span><span>'+esc(o.currentTime)+' Oranı: <b class="bad">'+o.currentOdd.toFixed(2)+'</b></span></div></div>';
+    '<div class="row sp sub" style="margin-top:10px;background:var(--card2);padding:8px;border-radius:8px"><span>'+esc(o.initialTime)+' Oranı: <b>'+parseFloat(o.initialOdd).toFixed(2)+'</b></span><span>'+esc(o.currentTime)+' Oranı: <b class="bad">'+parseFloat(o.currentOdd).toFixed(2)+'</b></span></div></div>';
   }).join("")+
-  '<div class="hint">Oran düşüşleri bülten saat güncellemelerine göre anlık taranır.</div>';
+  '<div class="hint">Oran düşüşleri bülten servisinden otomatik güncellenir.</div>';
 }
 
 function ongoru(){var f=S.filter,rows=PRED.filter(function(p){return f=="Tümü"||(f=="Kazandı"&&p[7]=="w")||(f=="Kaybetti"&&p[7]=="l")});
@@ -219,8 +227,20 @@ document.addEventListener("click",function(e){
 function syncDraft(){var n=$("#nm");if(!n)return;S.draft.name=n.value;S.draft.mode=$("#md").value;
 document.querySelectorAll("[data-op]").forEach(function(s){S.draft.rules[+s.dataset.op].op=s.value});
 document.querySelectorAll("[data-v]").forEach(function(s){S.draft.rules[+s.dataset.v].v=s.value})}
+
+function fetchOddsDrops(){
+  fetch("/api/odds-drops").then(function(r){return r.json()}).then(function(d){
+    if(d&&d.length){
+      ODDS_DROPS=d;
+      saveOdds();
+      if(S.tab=="oranlar") render();
+    }
+  }).catch(function(){});
+}
+
 function loadLive(){fetch("/api/live").then(function(r){return r.json()}).then(function(d){if(d&&d.length){RADAR=d;if(S.tab=="radar")render()}}).catch(function(){})}
 loadLive();setInterval(loadLive,60000);
+fetchOddsDrops();setInterval(fetchOddsDrops,60000);
 
 render();
 </script>
