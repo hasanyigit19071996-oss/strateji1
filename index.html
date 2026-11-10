@@ -1,264 +1,255 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Strateji Sistemi</title>
-<style>
-:root{--bg:#0a1220;--card:#111c30;--card2:#182a47;--line:#233a5e;--tx:#e6eefb;--mut:#8da2c0;--acc:#3b82f6;--accfg:#ffffff;--ok:#22c55e;--bad:#ef4444;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-:root[data-theme="light"]{--bg:#eef3fb;--card:#fff;--card2:#e3ecf9;--line:#cfdcf0;--tx:#0e1a2e;--mut:#55698a;--accfg:#fff}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#eef3fb;--card:#fff;--card2:#e3ecf9;--line:#cfdcf0;--tx:#0e1a2e;--mut:#55698a}}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:520px;margin:0 auto;padding:14px 14px 110px}
-h1{font-size:20px;margin:0}h2{font-size:15px;margin:0 0 8px}
-.sub{color:var(--mut);font-size:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
-.row{display:flex;align-items:center;gap:8px}.sp{justify-content:space-between}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
-.stat b{display:block;font-size:20px}.stat span{font-size:11px;color:var(--mut)}
-.ok{color:var(--ok)}.bad{color:var(--bad)}.acc{color:var(--acc)}
-.chip{border:1px solid var(--line);background:var(--card2);color:var(--tx);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer}
-.chip.on{background:var(--acc);color:var(--accfg);border-color:var(--acc);font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.btn{width:100%;background:var(--acc);color:var(--accfg);border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
-.btn.ghost{background:var(--card2);color:var(--tx);border:1px solid var(--line);margin-top:8px}
-input,select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
-label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
-.tog{width:44px;height:26px;border-radius:99px;background:var(--line);position:relative;border:0;flex:none;cursor:pointer}
-.tog::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s}
-.tog.on{background:var(--ok)}.tog.on::after{left:21px}
-.match{border-left:3px solid var(--mut)}.match.w{border-left-color:var(--ok)}.match.l{border-left-color:var(--bad)}
-.odd{background:var(--card2);border-radius:8px;padding:4px 9px;font-weight:700}
-.tag{font-size:11px;border-radius:6px;padding:2px 7px;background:var(--card2)}
-.tag.w{color:var(--ok)}.tag.l{color:var(--bad)}
-.rule{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
-.rule .row{margin-top:6px}.rule .row>*{flex:1}
-.x{background:none;border:0;color:var(--bad);cursor:pointer;font-size:13px;flex:none!important}
-.edit-btn{background:none;border:0;color:var(--acc);cursor:pointer;font-size:13px;flex:none!important;margin-left:auto;margin-right:8px}
-.rule-tag{font-size:11px;background:var(--card2);border:1px solid var(--line);padding:3px 8px;border-radius:6px;color:var(--mut);margin-top:6px;display:inline-block}
-.hint{background:var(--card2);border-radius:10px;padding:8px;font-size:12px;color:var(--mut);margin-top:8px}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;align-items:center;z-index:5}
-nav button{background:none;border:0;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:48px}
-nav button.on{color:var(--acc)}nav button i{font-style:normal;font-size:18px}
-nav .plus{width:52px;height:52px;border-radius:16px;background:var(--acc);color:var(--accfg);font-size:28px;font-weight:700;margin-top:-18px;min-width:0;justify-content:center}
-.bar{height:6px;border-radius:999px;background:var(--bad);overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--ok)}
-.live{color:var(--ok);font-weight:700;font-size:12px}
-.sc{font-size:22px;font-weight:800;min-width:56px;text-align:center}
-.drop-badge{background:rgba(239,68,68,0.2);color:var(--bad);border:1px solid var(--bad);padding:2px 6px;border-radius:6px;font-size:11px;font-weight:700}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InplayFlux Live Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#0b0f17',
+              card: '#131b2e',
+              border: '#1f293d',
+              accent: '#10b981',
+              muted: '#64748b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #0b0f17; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(19, 27, 46, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    /* Toggle Switch Animasyonu */
+    .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+    .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+  </style>
 </head>
-<body>
-<main id="app"></main>
-<nav id="nav"></nav>
-<script>
-// ==========================================
-var API_KEY = "API_KEY_BURAYA"; 
-// ==========================================
+<body class="pb-24 select-none">
 
-var CATS=[
-["Dakika / Periyot",["Dakika","Periyot","Yarı ilk X dakika"]],
-["Skor / Gol",["Skor","Kim önde","Toplam gol","Yarı gol sayısı","KG Var / Yok","Sıradaki gol","Sıradaki gol çifte şans"]],
-["Korner / Alt-Üst oranı",["Alt / Üst oranı","Maç öncesi Alt / Üst","Favori oranı","Maç öncesi 1X2","Maç öncesi KG","Korner Alt / Üst"]],
-["İstatistik",["İstatistik","Sarı kart","Şut","İsabetli şut","Korner"]]];
-var FREQ=["İstatistik","Dakika","Maç öncesi 1X2","Kim önde","Yarı ilk X dakika","Skor"];
-var OPS=["büyük eşit","küçük eşit","eşit"];
+  <!-- Header -->
+  <header class="sticky top-0 z-40 glass-card px-4 py-3 flex justify-between items-center border-b border-brand-border">
+    <div class="flex items-center gap-2">
+      <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+      <h1 class="font-bold text-lg tracking-wide text-white">INPLAY<span class="text-emerald-400">FLUX</span></h1>
+    </div>
+    <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full font-mono">
+      ● CANLI STREAM
+    </span>
+  </header>
 
-var RADAR = [];
-var PRED = [];
-var PRE = [];
-var ODDS_DROPS = [];
+  <!-- Main Content Container -->
+  <main class="p-4 max-w-md mx-auto space-y-4">
+    
+    <!-- SEKME 1: MAÇ PANELİ (Örnek Görünüm) -->
+    <div id="sec-panel" class="tab-content space-y-3">
+      <div class="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-1">Öne Çıkan Canlı Maçlar</div>
+      
+      <!-- Örnek Canlı Maç Kartı -->
+      <div class="glass-card rounded-xl p-3 border border-brand-border space-y-3">
+        <div class="flex justify-between items-center text-xs text-brand-muted border-b border-brand-border/50 pb-2">
+          <span>Süper Lig • 68'</span>
+          <span class="text-emerald-400 font-mono">Baskı Endeksi: %84</span>
+        </div>
+        
+        <div class="flex justify-between items-center font-bold text-sm">
+          <span>Galatasaray</span>
+          <span class="text-emerald-400 font-mono text-base">2 - 1</span>
+          <span>Fenerbahçe</span>
+        </div>
 
-var savedTab = "panel";
-try {
-  var st = localStorage.getItem("aktifSekme");
-  if(st && ["panel","ongoru","mac","radar","oranlar","menu","yeni"].indexOf(st) !== -1){
-    savedTab = st;
-  }
-} catch(e) {}
+        <!-- İstatistik Değerleri (Ayar Kapatılınca Gizlenir) -->
+        <div data-feature="istatistik" class="grid grid-cols-3 gap-2 text-center bg-brand-bg/50 p-2 rounded-lg text-xs">
+          <div><span class="text-brand-muted block">Şut</span> 12 - 8</div>
+          <div><span class="text-brand-muted block">İsabet</span> 5 - 3</div>
+          <div><span class="text-brand-muted block">Tehlikeli Atak</span> 45 - 32</div>
+        </div>
 
-var S={tab:savedTab,strats:load(),draft:fresh(),editIdx:null,radar:{al:true,ust:false,kor:false,kg:true,ist:true},tg:false,filter:"Tümü"};
+        <!-- Korner Verisi (Ayar Kapatılınca Gizlenir) -->
+        <div data-feature="korner" class="flex justify-between items-center text-xs bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+          <span class="text-emerald-400 font-medium"><i class="fa-solid fa-flag-checkered mr-1"></i> Kornerler</span>
+          <span class="font-bold">6 - 4 (Toplam 10)</span>
+        </div>
 
-function fresh(){return{name:"",mode:"Canlı (In-Play)",rules:[]}}
-function load(){try{var v=localStorage.getItem("strats");if(v)return JSON.parse(v)}catch(e){}return[]}
-function save(){try{localStorage.setItem("strats",JSON.stringify(S.strats))}catch(e){}}
+        <!-- Oranlar Verisi (Ayar Kapatılınca Gizlenir) -->
+        <div data-feature="alt_ust" class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-brand-bg p-2 rounded text-center">2.5 Üst: <span class="text-emerald-400 font-bold">1.72</span></div>
+          <div class="bg-brand-bg p-2 rounded text-center">2.5 Alt: <span class="text-emerald-400 font-bold">2.10</span></div>
+        </div>
+      </div>
+    </div>
 
-// Strateji Eşleşme Kontrol Motoru (Gerçek Zamanlı)
-function evaluateStrategies(){
-  var totalSignals = 0;
-  S.strats.forEach(function(st){
-    if(!st.on || !st.rules || !st.rules.length){ st.sig = 0; return; }
-    var matchCount = 0;
-    RADAR.forEach(function(r){
-      // r formatı: [home, away, elapsedStr, score, shotsOn, shotsTotal, corners, penaltyShots, minuteNum]
-      var min = r[8] || 0;
-      var passed = true;
-      st.rules.forEach(function(rule){
-        var val = parseFloat(rule.v) || 0;
-        var targetVal = 0;
-        if(rule.t === "Dakika") targetVal = min;
-        else if(rule.t === "İstatistik" || rule.t === "Şut") targetVal = r[5];
-        else if(rule.t === "İsabetli şut") targetVal = r[4];
-        else if(rule.t === "Korner") targetVal = r[6];
+    <!-- SEKME 2: AYARLAR / MENÜ PANELİ -->
+    <div id="sec-menu" class="tab-content hidden space-y-4">
+      <div>
+        <h2 class="text-xl font-bold text-white">Arayüz Ayarları</h2>
+        <p class="text-xs text-brand-muted">Görmek istediğiniz veri bileşenlerini aktif edin.</p>
+      </div>
 
-        if(rule.op === "büyük eşit" && !(targetVal >= val)) passed = false;
-        if(rule.op === "küçük eşit" && !(targetVal <= val)) passed = false;
-        if(rule.op === "eşit" && !(targetVal === val)) passed = false;
-      });
-      if(passed) matchCount++;
+      <div class="glass-card rounded-2xl divide-y divide-brand-border/60 overflow-hidden">
+        
+        <!-- Switch 1: Sağlanan Oranlar -->
+        <div class="flex justify-between items-center p-4">
+          <div>
+            <div class="font-medium text-sm text-white">Sağlanan oranlar</div>
+            <div class="text-xs text-brand-muted">Stratejim sonuç Alt/Üst oranı</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="saglanan_oranlar" class="sr-only peer" onchange="updateSetting(this)">
+            <div class="w-11 h-6 bg-brand-bg peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- Switch 2: Alt / Üst Oranları -->
+        <div class="flex justify-between items-center p-4">
+          <div>
+            <div class="font-medium text-sm text-white">Alt / Üst oranları</div>
+            <div class="text-xs text-brand-muted">Gol alt/üst piyasası</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="alt_ust" class="sr-only peer" onchange="updateSetting(this)">
+            <div class="w-11 h-6 bg-brand-bg peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- Switch 3: Korner Oranları (İstediğin Ana Özellik) -->
+        <div class="flex justify-between items-center p-4 bg-emerald-500/5">
+          <div>
+            <div class="font-medium text-sm text-emerald-400">Korner oranları</div>
+            <div class="text-xs text-brand-muted">Korner alt/üst takibi ve oyunları</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="korner" class="sr-only peer" onchange="updateSetting(this)">
+            <div class="w-11 h-6 bg-brand-bg peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- Switch 4: KG Oranları -->
+        <div class="flex justify-between items-center p-4">
+          <div>
+            <div class="font-medium text-sm text-white">KG oranları</div>
+            <div class="text-xs text-brand-muted">Karşılıklı gol var/yok</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="kg_oranlari" class="sr-only peer" onchange="updateSetting(this)">
+            <div class="w-11 h-6 bg-brand-bg peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- Switch 5: İstatistikler -->
+        <div class="flex justify-between items-center p-4">
+          <div>
+            <div class="font-medium text-sm text-white">İstatistikler</div>
+            <div class="text-xs text-brand-muted">Atak, şut, korner, topa sahip olma</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="istatistik" class="sr-only peer" onchange="updateSetting(this)">
+            <div class="w-11 h-6 bg-brand-bg peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modern Inplayflux Alt Navigasyon -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-brand-border px-6 py-2">
+    <div class="max-w-md mx-auto flex justify-between items-center text-xs">
+      <button onclick="switchTab('sec-panel', this)" class="nav-btn flex flex-col items-center text-emerald-400">
+        <i class="fa-solid fa-table-cells-large text-lg"></i>
+        <span class="mt-1">Panel</span>
+      </button>
+      <button onclick="switchTab('sec-ongoru', this)" class="nav-btn flex flex-col items-center text-brand-muted hover:text-white">
+        <i class="fa-solid fa-chart-line text-lg"></i>
+        <span class="mt-1">Öngörü</span>
+      </button>
+      <button class="w-12 h-12 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center -mt-6 shadow-lg shadow-emerald-500/30 text-xl font-bold">
+        +
+      </button>
+      <button onclick="switchTab('sec-radar', this)" class="nav-btn flex flex-col items-center text-brand-muted hover:text-white">
+        <i class="fa-solid fa-radar text-lg"></i>
+        <span class="mt-1">Radar</span>
+      </button>
+      <button onclick="switchTab('sec-menu', this)" class="nav-btn flex flex-col items-center text-brand-muted hover:text-white">
+        <i class="fa-solid fa-sliders text-lg"></i>
+        <span class="mt-1">Ayar/Menü</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Akıllı Script: Hafıza (localStorage) Yönetimi -->
+  <script>
+    // Varsayılan Ayarlar (İlk Açılışta Korner vb. Açık Gelsin)
+    const defaultSettings = {
+      saglanan_oranlar: true,
+      alt_ust: false,
+      korner: true,
+      kg_oranlari: true,
+      istatistik: true
+    };
+
+    // Sayfa Yüklendiğinde Ayarları Yükle
+    document.addEventListener("DOMContentLoaded", () => {
+      loadSettings();
     });
-    st.sig = matchCount;
-    totalSignals += matchCount;
-  });
-}
 
-function $(s){return document.querySelector(s)}
-function esc(t){return String(t||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function head(t,s){return'<div class="row sp"><div><h1>'+t+'</h1><div class="sub">'+s+'</div></div><span class="live">● Canlı Veri</span></div><div style="height:12px"></div>'}
-function tog(k,on){return'<button class="tog'+(on?" on":"")+'" data-t="'+k+'" aria-label="'+k+'"></button>'}
-
-function panel(){
-  evaluateStrategies();
-  var a=S.strats||[],w=0,l=0,sg=0;a.forEach(function(x){w+=x.w;l+=x.l;sg+=(x.sig||0);});
-  return head("Stratejiler","Canlı kurallarını kaydet, sinyalleri otomatik al")+
-  '<div class="grid4"><div class="stat"><b>'+a.filter(function(x){return x.on}).length+'</b><span>Açık</span></div><div class="stat"><b>'+sg+'</b><span>Sinyal</span></div><div class="stat"><b class="ok">'+w+'</b><span>Kazandı</span></div><div class="stat"><b class="bad">'+l+'</b><span>Kaybetti</span></div></div>'+
-  '<h2>Stratejilerim <span class="sub">'+a.length+'</span></h2>'+
-  (a.map(function(x,i){
-    var pc=x.w+x.l?Math.round(100*x.w/(x.w+x.l)):0;
-    var rulesHtml = (x.rules && x.rules.length) ? '<div style="margin-top:6px">'+x.rules.map(function(r){return '<span class="rule-tag">'+esc(r.t)+' '+esc(r.op)+' '+esc(r.v)+'</span>'}).join(" ")+'</div>' : '<div class="sub" style="margin-top:4px">Kural yok</div>';
-    return '<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b><span class="tag" style="background:var(--acc);color:#fff">Sinyal: '+(x.sig||0)+'</span>'+tog("s"+i,x.on)+'</div>'+rulesHtml+'<div class="row sub" style="margin-top:8px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="edit-btn" data-ed="'+i+'">Düzenle</button><button class="x" data-d="'+i+'">Sil</button></div></div>';
-  }).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>');
-}
-
-function ai(r){
-  try {
-    var raw = 6*(r[4]||0) + 2*(r[5]||0) + 2.5*(r[6]||0) + 0.35*(r[7]||0);
-    return Math.min(95, Math.round(100 * (1 - Math.exp(-raw / 60))));
-  } catch(e){ return 0; }
-}
-
-function radar(){
-  if(!RADAR.length) return head("Radar","Yapay zeka gol ihtimali") + '<div class="card sub">Şu an oynanan canlı maç bulunamadı veya veri bekleniyor...</div>';
-  var L=RADAR.map(function(r){return{r:r,p:ai(r)}}).sort(function(a,b){return b.p-a.p});
-  return head("Radar","Yapay zeka gol ihtimali · Canlı Maçlar")+
-  '<div class="grid4" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>'+L.length+'</b><span>Canlı</span></div><div class="stat"><b class="acc">'+L.filter(function(x){return x.p>=50}).length+'</b><span>Radar</span></div><div class="stat"><b class="ok">'+L.filter(function(x){return x.p>=70}).length+'</b><span>Yüksek</span></div></div>'+
-  L.map(function(x){var r=x.r,p=x.p,c=p>=70?"ok":p>=50?"acc":"sub";return'<div class="card"><div class="row sp sub"><span>'+r[2]+' · '+(p>=70?"Yüksek":p>=50?"Orta":"Düşük")+' ihtimal</span><b class="'+c+'">%'+p+'</b></div><div class="row sp" style="margin-top:6px"><b>'+r[0]+'<br>'+r[1]+'</b><span class="sc">'+r[3]+'</span></div><div class="bar" style="background:var(--line)"><i style="width:'+p+'%;background:var(--acc)"></i></div><div class="sub">İsabetli şut '+(r[4]||0)+' · Şut '+(r[5]||0)+' · Korner '+(r[6]||0)+'</div></div>'}).join("");
-}
-
-function oranlar(){ return head("Oran Düşüş Takibi","Bülten hareketleri") + '<div class="card sub">Oran takip modülü aktif.</div>'; }
-function ongoru(){ return head("Öngörü","Radar + Piyasa kararı") + '<div class="card sub">Öngörü modülü aktif.</div>'; }
-function mac(){ return head("Maç öncesi","İstatistik tahminleri") + '<div class="card sub">Maç öncesi modül aktif.</div>'; }
-function menu(){
-  var R=S.radar,L=[["al","Sağlanan oranlar","Stratejim sonuç Alt ve Üst oranı"],["ust","Alt / Üst oranları","Gol alt/üst piyasası"],["kor","Korner oranları","Korner alt/üst takibi"],["kg","KG oranları","Karşılıklı gol var/yok"],["ist","İstatistik","Atak, şut, korner, topa sahip olma"]];
-  return head("Menü","Ayarlar ve Entegrasyon")+
-  '<div class="card">'+L.map(function(x){return'<div class="row sp" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>'+x[1]+'</b><div class="sub">'+x[2]+'</div></div>'+tog("r"+x[0],R[x[0]])+'</div>'}).join("")+'</div>';
-}
-
-function yeni(){
-  var d=S.draft, isEdit = S.editIdx !== null;
-  return head(isEdit ? "Stratejiyi Düzenle" : "Yeni strateji","Kuralları seç, sınırları belirle")+
-  '<div class="card"><label>Ad</label><input id="nm" value="'+esc(d.name)+'" placeholder="Örn: Dakika &gt; 3"><label>Mod</label><select id="md"><option'+(d.mode=="Canlı (In-Play)"?" selected":"")+'>Canlı (In-Play)</option></select></div>'+
-  '<div class="card"><h2>Canlı kural sihirbazı</h2><div class="sub">Kuralların hepsi bağımsız.</div>'+
-  '<div class="hint"><b class="acc">★ Sık kullandıkların</b><div class="chips" style="margin-top:8px">'+FREQ.map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div></div>'+
-  CATS.map(function(c){return'<div class="card"><h2>'+c[0]+'</h2><div class="chips">'+c[1].map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div>'}).join("")+
-  '<h2>Kurallar <span class="sub">'+(d.rules||[]).length+'</span></h2>'+
-  ((d.rules||[]).map(function(r,i){return'<div class="rule"><div class="row sp"><b>'+esc(r.t)+'</b><button class="x" data-rm="'+i+'">Sil</button></div><div class="row"><select data-op="'+i+'">'+OPS.map(function(o){return'<option'+(o==r.op?" selected":"")+'>'+o+'</option>'}).join("")+'</select><input type="number" data-v="'+i+'" value="'+r.v+'"></div><div class="hint">'+esc(r.t)+' '+r.op+' '+r.v+' olduğunda sinyal gelir.</div></div>'}).join("")||'<div class="card sub">Yukarıdan en az bir kural ekle.</div>')+
-  '<button class="btn" id="sv">'+(isEdit?"Değişiklikleri Kaydet":"Kaydet ve aç")+'</button>'+
-  (isEdit?'<button class="btn ghost" id="cn">İptal Et</button>':'');
-}
-
-function render(){
-  try {
-    var MAP = {panel:panel, ongoru:ongoru, mac:mac, radar:radar, oranlar:oranlar, menu:menu, yeni:yeni};
-    var fn = MAP[S.tab] || panel;
-    var htmlContent = fn();
-    var y=window.scrollY;
-    var appEl = $("#app");
-    if(appEl) appEl.innerHTML = htmlContent;
-    window.scrollTo(0, S.tab=="yeni"?y:0);
-    var M=[["panel","▦","Panel"],["ongoru","↗","Öngörü"],["oranlar","%","Oranlar"],["yeni","+",""],["radar","◎","Radar"],["menu","≡","Menü"]];
-    var navEl = $("#nav");
-    if(navEl) navEl.innerHTML = M.map(function(m){return m[0]=="yeni"?'<button class="plus" data-n="yeni" aria-label="Yeni strateji">+</button>':'<button data-n="'+m[0]+'" class="'+((S.tab==m[0]||(S.tab=="mac"&&m[0]=="menu"))?"on":"")+'"><i>'+m[1]+'</i>'+m[2]+'</button>'}).join("");
-  } catch(err) {
-    console.error("Render hatasi:", err);
-  }
-}
-
-document.addEventListener("click",function(e){
-  var el=e.target.closest("[data-n],[data-go],[data-t],[data-a],[data-rm],[data-d],[data-ed],[data-f],#sv,#cn");
-  if(!el)return;
-  var D=el.dataset;
-  if(D.n||D.go){
-    if((D.n=="yeni"||D.go=="yeni") && S.editIdx===null){ S.draft=fresh(); }
-    S.tab=D.n||D.go;
-    try{ localStorage.setItem("aktifSekme", S.tab); }catch(e){}
-  }
-  else if(D.ed!==undefined){
-    var idx = +D.ed;
-    S.editIdx = idx;
-    var st = S.strats[idx];
-    S.draft = JSON.parse(JSON.stringify({name:st.n, mode:"Canlı (In-Play)", rules:st.rules||[]}));
-    S.tab = "yeni";
-  }
-  else if(el.id=="cn"){ S.editIdx = null; S.draft = fresh(); S.tab = "panel"; }
-  else if(D.f){S.filter=D.f}
-  else if(D.a){syncDraft();S.draft.rules.push({t:D.a,op:OPS[0],v:3})}
-  else if(D.rm!==undefined){syncDraft();S.draft.rules.splice(+D.rm,1)}
-  else if(D.d!==undefined){S.strats.splice(+D.d,1);save()}
-  else if(D.t){var k=D.t;if(k=="tg")S.tg=!S.tg;else if(k[0]=="s"){var s=S.strats[+k.slice(1)];s.on=!s.on;save()}else S.radar[k.slice(1)]=!S.radar[k.slice(1)]}
-  else if(el.id=="sv"){
-    syncDraft();var d=S.draft;if(!d.rules.length){alert("En az bir kural ekle.");return}
-    if(S.editIdx !== null){
-      var cur = S.strats[S.editIdx];
-      cur.n = d.name || "Strateji";
-      cur.rules = d.rules;
-      S.editIdx = null;
-    } else {
-      S.strats.unshift({n:d.name||"Yeni strateji",on:true,w:0,l:0,roi:0,sig:0,rules:d.rules});
+    function loadSettings() {
+      // localStorage'dan oku yoksa varsayılanı al
+      const saved = JSON.parse(localStorage.getItem('user_app_settings')) || defaultSettings;
+      
+      for (const [key, val] of Object.entries(saved)) {
+        const el = document.getElementById(key);
+        if (el) {
+          el.checked = val;
+        }
+        // Maç kartlarında ilgili bloğu gizle/göster
+        toggleFeatureVisibility(key, val);
+      }
     }
-    save();S.draft=fresh();
-    S.tab="panel";
-    try{ localStorage.setItem("aktifSekme", S.tab); }catch(e){}
-  }
-  render();
-});
 
-function syncDraft(){var n=$("#nm");if(!n)return;S.draft.name=n.value;S.draft.mode=$("#md").value;
-document.querySelectorAll("[data-op]").forEach(function(s){S.draft.rules[+s.dataset.op].op=s.value});
-document.querySelectorAll("[data-v]").forEach(function(s){S.draft.rules[+s.dataset.v].v=s.value})}
-
-// REAL API FOOTBALL CALL WITH MATCH METRICS MAPPING
-function fetchLiveMatches() {
-  if(!API_KEY || API_KEY === "ce7733fd42afe0aab88f92825cb3d795") return;
-  fetch("https://v3.football.api-sports.io/fixtures?live=all", {
-    method: "GET",
-    headers: {
-      "x-rapidapi-key": API_KEY,
-      "x-rapidapi-host": "v3.football.api-sports.io"
+    function updateSetting(el) {
+      const saved = JSON.parse(localStorage.getItem('user_app_settings')) || defaultSettings;
+      saved[el.id] = el.checked;
+      
+      // LocalStorage üzerine YAZ (Sayfa yenilense de kalır)
+      localStorage.setItem('user_app_settings', JSON.stringify(saved));
+      
+      // Anlık arayüze yansıt
+      toggleFeatureVisibility(el.id, el.checked);
     }
-  })
-  .then(function(res){ return res.json(); })
-  .then(function(data){
-    if(data && data.response){
-      RADAR = data.response.map(function(item){
-        var h = item.teams.home.name;
-        var a = item.teams.away.name;
-        var minuteNum = item.fixture.status.elapsed || 0;
-        var elapsed = minuteNum + "’";
-        var score = (item.goals.home || 0) + "-" + (item.goals.away || 0);
-        return [h, a, elapsed, score, 0, 0, 0, 0, minuteNum]; 
+
+    function toggleFeatureVisibility(featureId, isVisible) {
+      const elements = document.querySelectorAll(`[data-feature="${featureId}"]`);
+      elements.forEach(item => {
+        if (isVisible) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
       });
-      render();
     }
-  })
-  .catch(function(err){ console.error("API Hata:", err); });
-}
 
-fetchLiveMatches();
-setInterval(fetchLiveMatches, 60000);
+    // Alt Navigasyon Sekme Değiştirici
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
 
-render();
-</script>
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('text-emerald-400');
+        b.classList.add('text-brand-muted');
+      });
+      btn.classList.remove('text-brand-muted');
+      btn.classList.add('text-emerald-400');
+    }
+  </script>
+
 </body>
 </html>
