@@ -104,12 +104,12 @@ CATS.map(function(c){return'<div class="card"><h2>'+c[0]+'</h2><div class="chips
 '<h2>Kurallar <span class="sub">'+d.rules.length+'</span></h2>'+
 (d.rules.map(function(r,i){return'<div class="rule"><div class="row sp"><b>'+esc(r.t)+'</b><button class="x" data-rm="'+i+'">Sil</button></div><div class="row"><select data-op="'+i+'">'+OPS.map(function(o){return'<option'+(o==r.op?" selected":"")+'>'+o+'</option>'}).join("")+'</select><input type="number" data-v="'+i+'" value="'+r.v+'"></div><div class="hint">'+esc(r.t)+' '+r.op+' '+r.v+' olduğunda sinyal gelir.</div></div>'}).join("")||'<div class="card sub">Yukarıdan en az bir kural ekle.</div>')+
 '<button class="btn" id="sv">Kaydet ve aç</button>'}
-function render(){var t=S.tab||localStorage.getItem('aktifSekme')||'panel';
+function render(){var t=S.tab,h={panel:panel,ongoru:ongoru_ekrani}[t]||panel;
 var y=window.scrollY;$("#app").innerHTML=h;window.scrollTo(0,t=="yeni"?y:0);
 var M=[["panel","▦","Panel"],["ongoru","↗","Öngörü"],["yeni","+",""],["radar","◎","Radar"],["menu","≡","Menü"]];
 $("#nav").innerHTML=M.map(function(m){return m[0]=="yeni"?'<button class="plus" data-n="yeni" aria-label="Yeni strateji">+</button>':'<button data-n="'+m[0]+'" class="'+((t==m[0]||(t=="mac"&&m[0]=="menu"))?"on":"")+'"><i>'+m[1]+'</i>'+m[2]+'</button>'}).join("")}
 document.addEventListener("click",function(e){var el=e.target.closest("[data-n],[data-go],[data-t],[data-a],[data-rm],[data-d],[data-f],#sv");if(!el)return;var D=el.dataset;
-if(D.n||D.go){S.tab=D.n||D.go; localStorage.setItem('aktifSekme', S.tab);}
+if(D.n||D.go){S.tab=D.n||D.go}
 else if(D.f){S.filter=D.f}
 else if(D.a){syncDraft();S.draft.rules.push({t:D.a,op:OPS[0],v:3})}
 else if(D.rm!==undefined){syncDraft();S.draft.rules.splice(+D.rm,1)}
