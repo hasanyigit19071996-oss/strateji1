@@ -40,12 +40,13 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
 .rule-tag{font-size:11px;background:var(--card2);border:1px solid var(--line);padding:3px 8px;border-radius:6px;color:var(--mut);margin-top:6px;display:inline-block}
 .hint{background:var(--card2);border-radius:10px;padding:8px;font-size:12px;color:var(--mut);margin-top:8px}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;align-items:center;z-index:5}
-nav button{background:none;border:0;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:56px}
+nav button{background:none;border:0;color:var(--mut);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:48px}
 nav button.on{color:var(--acc)}nav button i{font-style:normal;font-size:18px}
 nav .plus{width:52px;height:52px;border-radius:16px;background:var(--acc);color:var(--accfg);font-size:28px;font-weight:700;margin-top:-18px;min-width:0;justify-content:center}
 .bar{height:6px;border-radius:99px;background:var(--bad);overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--ok)}
 .live{color:var(--ok);font-weight:700;font-size:12px}
 .sc{font-size:22px;font-weight:800;min-width:56px;text-align:center}
+.drop-badge{background:rgba(239,68,68,0.2);color:var(--bad);border:1px solid var(--bad);padding:2px 6px;border-radius:6px;font-size:11px;font-weight:700}
 </style>
 </head>
 <body>
@@ -63,10 +64,17 @@ var PRED=[["GOG FCC","Clube de Salgaocar","Hindistan Şampiyonası","71’","1-1
 var PRE=[["Club León","Guadalajara","Meksika Liga MX","05:00","MS 3.5 Alt",1.40,"w","1-1"],["C.D. Marathón","Deportivo Choloma","Honduras Ulusal Lig","04:30","C.D. Marathón 1.5 Alt",1.43,"l","2-0"],["C.S. Herediano","Saprissa","Kosta Rika Primera","03:00","MS 2.5 Alt",1.38,"w","1-0"]];
 var RADAR=[["Fratria","FC Sportist Svoge","79’","3-1",6,4,5,38],["Tatran Liptovsky","Bytca","47’","1-1",3,3,3,22],["Deportivo Maldonado II","Nacional M.","67’","1-0",2,5,2,19],["Lokomotiv","Dinamo","55’","0-0",1,2,1,9]];
 
+// Oran Düşüş Takip Verisi (A Takımı vs B Takımı Örneği Dahil)
+var ODDS_DROPS=[
+  {home:"A Takımı", away:"B Takımı", matchTime:"23:00", pick:"MS 1", initialTime:"18:00", initialOdd:1.92, currentTime:"21:00", currentOdd:1.70},
+  {home:"Real Madrid", away:"Barcelona", matchTime:"22:00", pick:"MS 1", initialTime:"14:00", initialOdd:2.10, currentTime:"19:30", currentOdd:1.85},
+  {home:"Arsenal", away:"Chelsea", matchTime:"20:30", pick:"2.5 Üst", initialTime:"15:00", initialOdd:1.80, currentTime:"18:15", currentOdd:1.55}
+];
+
 var savedTab = "panel";
 try {
   var st = localStorage.getItem("aktifSekme");
-  if(st && ["panel","ongoru","mac","radar","menu","yeni"].indexOf(st) !== -1){
+  if(st && ["panel","ongoru","mac","radar","oranlar","menu","yeni"].indexOf(st) !== -1){
     savedTab = st;
   }
 } catch(e) {}
@@ -91,6 +99,18 @@ a.map(function(x,i){
   var rulesHtml = (x.rules && x.rules.length) ? '<div style="margin-top:6px">'+x.rules.map(function(r){return '<span class="rule-tag">'+esc(r.t)+' '+esc(r.op)+' '+esc(r.v)+'</span>'}).join(" ")+'</div>' : '<div class="sub" style="margin-top:4px">Kural yok</div>';
   return '<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b>'+tog("s"+i,x.on)+'</div>'+rulesHtml+'<div class="row sub" style="margin-top:8px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="edit-btn" data-ed="'+i+'">Düzenle</button><button class="x" data-d="'+i+'">Sil</button></div></div>';
 }).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>'}
+
+function oranlar(){
+  return head("Oran Düşüş Takibi","Belirgin oran düşüşü yaşanan maçlar")+
+  '<div class="grid4" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px"><div class="stat"><b>'+ODDS_DROPS.length+'</b><span>Sinyal Yapılan</span></div><div class="stat"><b class="bad">▼ Düşen</b><span>Oran Hareketleri</span></div></div>'+
+  ODDS_DROPS.map(function(o){
+    var dropPercent = (((o.initialOdd - o.currentOdd) / o.initialOdd) * 100).toFixed(1);
+    return '<div class="card"><div class="row sp"><b style="font-size:15px">'+esc(o.home)+' – '+esc(o.away)+'</b><span class="sub">Saat: '+esc(o.matchTime)+'</span></div>'+
+    '<div class="row sp" style="margin-top:8px"><div><span class="tag" style="font-size:12px">'+esc(o.pick)+'</span></div><div class="drop-badge">▼ %'+dropPercent+' Düşüş</div></div>'+
+    '<div class="row sp sub" style="margin-top:10px;background:var(--card2);padding:8px;border-radius:8px"><span>'+esc(o.initialTime)+' Oranı: <b>'+o.initialOdd.toFixed(2)+'</b></span><span>'+esc(o.currentTime)+' Oranı: <b class="bad">'+o.currentOdd.toFixed(2)+'</b></span></div></div>';
+  }).join("")+
+  '<div class="hint">Oran düşüşleri bülten saat güncellemelerine göre anlık taranır.</div>';
+}
 
 function ongoru(){var f=S.filter,rows=PRED.filter(function(p){return f=="Tümü"||(f=="Kazandı"&&p[7]=="w")||(f=="Kaybetti"&&p[7]=="l")});
 var w=PRED.filter(function(p){return p[7]=="w"}).length,l=PRED.length-w;
@@ -119,7 +139,7 @@ function radar(){
   '<div class="hint">Yapay zeka tahmini canlı istatistiklere göre anlık hesaplanır.</div>';
 }
 
-function menu(){var R=S.radar,L=[["al","Sağlanan oranlar","Stratejim sonuç Alt و Üst oranı"],["ust","Alt / Üst oranları","Gol alt/üst piyasası"],["kor","Korner oranları","Korner alt/üst takibi"],["kg","KG oranları","Karşılıklı gol var/yok"],["ist","İstatistik","Atak, şut, korner, topa sahip olma"]];
+function menu(){var R=S.radar,L=[["al","Sağlanan oranlar","Stratejim sonuç Alt ve Üst oranı"],["ust","Alt / Üst oranları","Gol alt/üst piyasası"],["kor","Korner oranları","Korner alt/üst takibi"],["kg","KG oranları","Karşılıklı gol var/yok"],["ist","İstatistik","Atak, şut, korner, topa sahip olma"]];
 return head("Menü","Telegram ve radar ayarları")+
 '<div class="card">'+L.map(function(x){return'<div class="row sp" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>'+x[1]+'</b><div class="sub">'+x[2]+'</div></div>'+tog("r"+x[0],R[x[0]])+'</div>'}).join("")+'</div>'+
 '<button class="btn" data-go="ongoru">Öngörü ekranına git</button><button class="btn ghost" data-go="mac">Maç öncesi tahminler</button>'}
@@ -132,20 +152,20 @@ return head(isEdit ? "Stratejiyi Düzenle" : "Yeni strateji","Kuralları seç, s
 CATS.map(function(c){return'<div class="card"><h2>'+c[0]+'</h2><div class="chips">'+c[1].map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div>'}).join("")+
 '<h2>Kurallar <span class="sub">'+(d.rules||[]).length+'</span></h2>'+
 ((d.rules||[]).map(function(r,i){return'<div class="rule"><div class="row sp"><b>'+esc(r.t)+'</b><button class="x" data-rm="'+i+'">Sil</button></div><div class="row"><select data-op="'+i+'">'+OPS.map(function(o){return'<option'+(o==r.op?" selected":"")+'>'+o+'</option>'}).join("")+'</select><input type="number" data-v="'+i+'" value="'+r.v+'"></div><div class="hint">'+esc(r.t)+' '+r.op+' '+r.v+' olduğunda sinyal gelir.</div></div>'}).join("")||'<div class="card sub">Yukarıdan en az bir kural ekle.</div>')+
-'<button class="btn" id="sv">'+(isEdit?"Değişiklikleri Kaydet":"Kaydet و aç")+'</button>'+
+'<button class="btn" id="sv">'+(isEdit?"Değişiklikleri Kaydet":"Kaydet ve aç")+'</button>'+
 (isEdit?'<button class="btn ghost" id="cn">İptal Et</button>':'');
 }
 
 function render(){
   try {
-    var MAP = {panel:panel, ongoru:ongoru, mac:mac, radar:radar, menu:menu, yeni:yeni};
+    var MAP = {panel:panel, ongoru:ongoru, mac:mac, radar:radar, oranlar:oranlar, menu:menu, yeni:yeni};
     var fn = MAP[S.tab] || panel;
     var htmlContent = fn();
     var y=window.scrollY;
     var appEl = $("#app");
     if(appEl) appEl.innerHTML = htmlContent;
     window.scrollTo(0, S.tab=="yeni"?y:0);
-    var M=[["panel","▦","Panel"],["ongoru","↗","Öngörü"],["yeni","+",""],["radar","◎","Radar"],["menu","≡","Menü"]];
+    var M=[["panel","▦","Panel"],["ongoru","↗","Öngörü"],["oranlar","%","Oranlar"],["yeni","+",""],["radar","◎","Radar"],["menu","≡","Menü"]];
     var navEl = $("#nav");
     if(navEl) navEl.innerHTML = M.map(function(m){return m[0]=="yeni"?'<button class="plus" data-n="yeni" aria-label="Yeni strateji">+</button>':'<button data-n="'+m[0]+'" class="'+((S.tab==m[0]||(S.tab=="mac"&&m[0]=="menu"))?"on":"")+'"><i>'+m[1]+'</i>'+m[2]+'</button>'}).join("");
   } catch(err) {
