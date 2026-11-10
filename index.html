@@ -54,7 +54,6 @@ nav .plus{width:52px;height:52px;border-radius:16px;background:var(--acc);color:
 <nav id="nav"></nav>
 <script>
 // ==========================================
-// API FOOTBALL ANAHTARINI BURAYA YAZ:
 var API_KEY = "API_KEY_BURAYA"; 
 // ==========================================
 
@@ -84,20 +83,51 @@ var S={tab:savedTab,strats:load(),draft:fresh(),editIdx:null,radar:{al:true,ust:
 function fresh(){return{name:"",mode:"Canlı (In-Play)",rules:[]}}
 function load(){try{var v=localStorage.getItem("strats");if(v)return JSON.parse(v)}catch(e){}return[]}
 function save(){try{localStorage.setItem("strats",JSON.stringify(S.strats))}catch(e){}}
+
+// Strateji Eşleşme Kontrol Motoru (Gerçek Zamanlı)
+function evaluateStrategies(){
+  var totalSignals = 0;
+  S.strats.forEach(function(st){
+    if(!st.on || !st.rules || !st.rules.length){ st.sig = 0; return; }
+    var matchCount = 0;
+    RADAR.forEach(function(r){
+      // r formatı: [home, away, elapsedStr, score, shotsOn, shotsTotal, corners, penaltyShots, minuteNum]
+      var min = r[8] || 0;
+      var passed = true;
+      st.rules.forEach(function(rule){
+        var val = parseFloat(rule.v) || 0;
+        var targetVal = 0;
+        if(rule.t === "Dakika") targetVal = min;
+        else if(rule.t === "İstatistik" || rule.t === "Şut") targetVal = r[5];
+        else if(rule.t === "İsabetli şut") targetVal = r[4];
+        else if(rule.t === "Korner") targetVal = r[6];
+
+        if(rule.op === "büyük eşit" && !(targetVal >= val)) passed = false;
+        if(rule.op === "küçük eşit" && !(targetVal <= val)) passed = false;
+        if(rule.op === "eşit" && !(targetVal === val)) passed = false;
+      });
+      if(passed) matchCount++;
+    });
+    st.sig = matchCount;
+    totalSignals += matchCount;
+  });
+}
+
 function $(s){return document.querySelector(s)}
 function esc(t){return String(t||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function head(t,s){return'<div class="row sp"><div><h1>'+t+'</h1><div class="sub">'+s+'</div></div><span class="live">● Canlı Veri</span></div><div style="height:12px"></div>'}
 function tog(k,on){return'<button class="tog'+(on?" on":"")+'" data-t="'+k+'" aria-label="'+k+'"></button>'}
 
 function panel(){
-  var a=S.strats||[],w=0,l=0,sg=0;a.forEach(function(x){w+=x.w;l+=x.l;sg+=x.sig});
+  evaluateStrategies();
+  var a=S.strats||[],w=0,l=0,sg=0;a.forEach(function(x){w+=x.w;l+=x.l;sg+=(x.sig||0);});
   return head("Stratejiler","Canlı kurallarını kaydet, sinyalleri otomatik al")+
   '<div class="grid4"><div class="stat"><b>'+a.filter(function(x){return x.on}).length+'</b><span>Açık</span></div><div class="stat"><b>'+sg+'</b><span>Sinyal</span></div><div class="stat"><b class="ok">'+w+'</b><span>Kazandı</span></div><div class="stat"><b class="bad">'+l+'</b><span>Kaybetti</span></div></div>'+
   '<h2>Stratejilerim <span class="sub">'+a.length+'</span></h2>'+
   (a.map(function(x,i){
     var pc=x.w+x.l?Math.round(100*x.w/(x.w+x.l)):0;
     var rulesHtml = (x.rules && x.rules.length) ? '<div style="margin-top:6px">'+x.rules.map(function(r){return '<span class="rule-tag">'+esc(r.t)+' '+esc(r.op)+' '+esc(r.v)+'</span>'}).join(" ")+'</div>' : '<div class="sub" style="margin-top:4px">Kural yok</div>';
-    return '<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b>'+tog("s"+i,x.on)+'</div>'+rulesHtml+'<div class="row sub" style="margin-top:8px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="edit-btn" data-ed="'+i+'">Düzenle</button><button class="x" data-d="'+i+'">Sil</button></div></div>';
+    return '<div class="card"><div class="row sp"><b>'+esc(x.n)+'</b><span class="tag" style="background:var(--acc);color:#fff">Sinyal: '+(x.sig||0)+'</span>'+tog("s"+i,x.on)+'</div>'+rulesHtml+'<div class="row sub" style="margin-top:8px"><span>Canlı</span><span class="ok">%'+pc+'</span><span>'+x.w+' / '+x.l+'</span><span class="'+(x.roi>=0?"ok":"bad")+'">ROI %'+x.roi+'</span><button class="edit-btn" data-ed="'+i+'">Düzenle</button><button class="x" data-d="'+i+'">Sil</button></div></div>';
   }).join("")||'<div class="card sub">Henüz strateji yok. Alttaki + ile ilk kuralını oluştur.</div>');
 }
 
@@ -109,27 +139,16 @@ function ai(r){
 }
 
 function radar(){
-  if(!RADAR.length) return head("Radar","Yapay zeka gol ihtimali") + '<div class="card sub">Canlı maç verileri çekiliyor veya şu an canlı maç yok...</div>';
+  if(!RADAR.length) return head("Radar","Yapay zeka gol ihtimali") + '<div class="card sub">Şu an oynanan canlı maç bulunamadı veya veri bekleniyor...</div>';
   var L=RADAR.map(function(r){return{r:r,p:ai(r)}}).sort(function(a,b){return b.p-a.p});
   return head("Radar","Yapay zeka gol ihtimali · Canlı Maçlar")+
   '<div class="grid4" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>'+L.length+'</b><span>Canlı</span></div><div class="stat"><b class="acc">'+L.filter(function(x){return x.p>=50}).length+'</b><span>Radar</span></div><div class="stat"><b class="ok">'+L.filter(function(x){return x.p>=70}).length+'</b><span>Yüksek</span></div></div>'+
-  L.map(function(x){var r=x.r,p=x.p,c=p>=70?"ok":p>=50?"acc":"sub";return'<div class="card"><div class="row sp sub"><span>'+r[2]+' · '+(p>=70?"Yüksek":p>=50?"Orta":"Düşük")+' ihtimal</span><b class="'+c+'">%'+p+'</b></div><div class="row sp" style="margin-top:6px"><b>'+r[0]+'<br>'+r[1]+'</b><span class="sc">'+r[3]+'</span></div><div class="bar" style="background:var(--line)"><i style="width:'+p+'%;background:var(--acc)"></i></div><div class="sub">İsabetli şut '+(r[4]||0)+' · Şut '+(r[5]||0)+' · Korner '+(r[6]||0)+' · Ceza sahası '+(r[7]||0)+'</div></div>'}).join("");
+  L.map(function(x){var r=x.r,p=x.p,c=p>=70?"ok":p>=50?"acc":"sub";return'<div class="card"><div class="row sp sub"><span>'+r[2]+' · '+(p>=70?"Yüksek":p>=50?"Orta":"Düşük")+' ihtimal</span><b class="'+c+'">%'+p+'</b></div><div class="row sp" style="margin-top:6px"><b>'+r[0]+'<br>'+r[1]+'</b><span class="sc">'+r[3]+'</span></div><div class="bar" style="background:var(--line)"><i style="width:'+p+'%;background:var(--acc)"></i></div><div class="sub">İsabetli şut '+(r[4]||0)+' · Şut '+(r[5]||0)+' · Korner '+(r[6]||0)+'</div></div>'}).join("");
 }
 
-function oranlar(){
-  if(!ODDS_DROPS.length) return head("Oran Düşüş Takibi","Bülten hareketleri") + '<div class="card sub">Oran düşüş verisi taranıyor veya tespit edilen belirgin düşüş yok...</div>';
-  return head("Oran Düşüş Takibi","Canlı oran hareketleri takibi")+
-  '<div class="grid4" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px"><div class="stat"><b>'+ODDS_DROPS.length+'</b><span>Taranan Maç</span></div><div class="stat"><b class="bad">▼ Düşüşler</b><span>Sinyal Yapılan</span></div></div>'+
-  ODDS_DROPS.map(function(o){
-    var dropPercent = (((o.initialOdd - o.currentOdd) / o.initialOdd) * 100).toFixed(1);
-    return '<div class="card"><div class="row sp"><b style="font-size:15px">'+esc(o.home)+' – '+esc(o.away)+'</b><span class="sub">Saat: '+esc(o.matchTime)+'</span></div>'+
-    '<div class="row sp" style="margin-top:8px"><div><span class="tag" style="font-size:12px">'+esc(o.pick)+'</span></div><div class="drop-badge">▼ %'+dropPercent+' Düşüş</div></div>'+
-    '<div class="row sp sub" style="margin-top:10px;background:var(--card2);padding:8px;border-radius:8px"><span>İlk Oran: <b>'+parseFloat(o.initialOdd).toFixed(2)+'</b></span><span>Güncel: <b class="bad">'+parseFloat(o.currentOdd).toFixed(2)+'</b></span></div></div>';
-  }).join("");
-}
-
-function ongoru(){ return head("Öngörü","Radar + Piyasa kararı") + '<div class="card sub">Canlı veri modunda henüz öngörü geçmişi yok.</div>'; }
-function mac(){ return head("Maç öncesi","İstatistik tahminleri") + '<div class="card sub">Maç öncesi veri modülü aktif.</div>'; }
+function oranlar(){ return head("Oran Düşüş Takibi","Bülten hareketleri") + '<div class="card sub">Oran takip modülü aktif.</div>'; }
+function ongoru(){ return head("Öngörü","Radar + Piyasa kararı") + '<div class="card sub">Öngörü modülü aktif.</div>'; }
+function mac(){ return head("Maç öncesi","İstatistik tahminleri") + '<div class="card sub">Maç öncesi modül aktif.</div>'; }
 function menu(){
   var R=S.radar,L=[["al","Sağlanan oranlar","Stratejim sonuç Alt ve Üst oranı"],["ust","Alt / Üst oranları","Gol alt/üst piyasası"],["kor","Korner oranları","Korner alt/üst takibi"],["kg","KG oranları","Karşılıklı gol var/yok"],["ist","İstatistik","Atak, şut, korner, topa sahip olma"]];
   return head("Menü","Ayarlar ve Entegrasyon")+
@@ -139,8 +158,8 @@ function menu(){
 function yeni(){
   var d=S.draft, isEdit = S.editIdx !== null;
   return head(isEdit ? "Stratejiyi Düzenle" : "Yeni strateji","Kuralları seç, sınırları belirle")+
-  '<div class="card"><label>Ad</label><input id="nm" value="'+esc(d.name)+'" placeholder="Örn: İY 1.5 Üst oranı &gt; 1.90"><label>Mod</label><select id="md"><option'+(d.mode=="Canlı (In-Play)"?" selected":"")+'>Canlı (In-Play)</option><option'+(d.mode=="Maç öncesi"?" selected":"")+'>Maç öncesi</option></select></div>'+
-  '<div class="card"><h2>Canlı kural sihirbazı</h2><div class="sub">Kuralların hepsi bağımsız. Birden fazla seçersen hepsi (VE) aranır.</div>'+
+  '<div class="card"><label>Ad</label><input id="nm" value="'+esc(d.name)+'" placeholder="Örn: Dakika &gt; 3"><label>Mod</label><select id="md"><option'+(d.mode=="Canlı (In-Play)"?" selected":"")+'>Canlı (In-Play)</option></select></div>'+
+  '<div class="card"><h2>Canlı kural sihirbazı</h2><div class="sub">Kuralların hepsi bağımsız.</div>'+
   '<div class="hint"><b class="acc">★ Sık kullandıkların</b><div class="chips" style="margin-top:8px">'+FREQ.map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div></div>'+
   CATS.map(function(c){return'<div class="card"><h2>'+c[0]+'</h2><div class="chips">'+c[1].map(function(x){return'<button class="chip" data-a="'+x+'">+ '+x+'</button>'}).join("")+'</div></div>'}).join("")+
   '<h2>Kurallar <span class="sub">'+(d.rules||[]).length+'</span></h2>'+
@@ -209,7 +228,7 @@ function syncDraft(){var n=$("#nm");if(!n)return;S.draft.name=n.value;S.draft.mo
 document.querySelectorAll("[data-op]").forEach(function(s){S.draft.rules[+s.dataset.op].op=s.value});
 document.querySelectorAll("[data-v]").forEach(function(s){S.draft.rules[+s.dataset.v].v=s.value})}
 
-// REAL API FOOTBALL CALL
+// REAL API FOOTBALL CALL WITH MATCH METRICS MAPPING
 function fetchLiveMatches() {
   if(!API_KEY || API_KEY === "ce7733fd42afe0aab88f92825cb3d795") return;
   fetch("https://v3.football.api-sports.io/fixtures?live=all", {
@@ -225,11 +244,12 @@ function fetchLiveMatches() {
       RADAR = data.response.map(function(item){
         var h = item.teams.home.name;
         var a = item.teams.away.name;
-        var elapsed = (item.fixture.status.elapsed || 0) + "’";
+        var minuteNum = item.fixture.status.elapsed || 0;
+        var elapsed = minuteNum + "’";
         var score = (item.goals.home || 0) + "-" + (item.goals.away || 0);
-        return [h, a, elapsed, score, 0, 0, 0, 0]; 
+        return [h, a, elapsed, score, 0, 0, 0, 0, minuteNum]; 
       });
-      if(S.tab === "radar") render();
+      render();
     }
   })
   .catch(function(err){ console.error("API Hata:", err); });
